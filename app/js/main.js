@@ -134,6 +134,6 @@ $('#submit').on('click', function(event){
   $tr.remove();
 
   var uuid = $tr.data('uuid');
-  var url = 'https://addressbook-c8.firebaseio.com/addresslist/' + uuid + '.json';
+  var url = 'https://addressbook-c8.firebaseio.com/users/' + fb.getAuth().uid + '/data/addresslist/' + uuid + '.json';
   $.ajax(url, {type: 'DELETE'});
   });
