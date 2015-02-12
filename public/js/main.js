@@ -13,6 +13,7 @@ var FIREBASE_URL = 'https://addressbook-c8.firebaseio.com/',
     $form        = $('form'),
     $create      = $('#createButton'),
     fb           = new Firebase(FIREBASE_URL),
+    token        = fb.getAuth().token,
     usersFbUrl;
 
 
@@ -21,7 +22,7 @@ if (fb.getAuth()) {
   $('.app').toggleClass('hidden'),
   $('.hidden-button').toggle();
 
-  $.get(FIREBASE_URL + 'users/' + fb.getAuth().uid + '/data/addresslist.json', function(res){
+  $.get(FIREBASE_URL + 'users/' + fb.getAuth().uid + '/data/addresslist.json?auth=' + token, function(res){
     if(res !== null) {
       Object.keys(res).forEach(function(uuid){
         addRowToTable(uuid,res[uuid]);
@@ -113,7 +114,7 @@ $('#submit').on('click', function(event){
 
   var $tr = $('<tr><td>' + contactFirstName + '</td><td>' + contactNickname + '</td><td>' + contactLastName + '</td><td>' + contactPhone + '</td><td>' + contactEmail + '</td><td>'+ contactTwitter+'</td><td><img src="'+ contactPhoto+'" class="image"</td><td><button class="removeBtn">Remove</button><td></tr>');
 
-  var url = FIREBASE_URL + 'users/' + fb.getAuth().uid + '/data/addresslist.json';
+  var url = FIREBASE_URL + 'users/' + fb.getAuth().uid + '/data/addresslist.json?auth=' + token;
   var data = JSON.stringify({firstName: contactFirstName, nickname: contactNickname, lastName: contactLastName, phone: contactPhone, email: contactEmail, twitter: contactTwitter, photoUrl: contactPhoto});
   debugger;
   $.post(url, data, function(res){
@@ -134,6 +135,6 @@ $('#submit').on('click', function(event){
   $tr.remove();
 
   var uuid = $tr.data('uuid');
-  var url = 'https://addressbook-c8.firebaseio.com/users/' + fb.getAuth().uid + '/data/addresslist/' + uuid + '.json';
+  var url = 'https://addressbook-c8.firebaseio.com/users/' + fb.getAuth().uid + '/data/addresslist/' + uuid + '.json?auth=' + token;
   $.ajax(url, {type: 'DELETE'});
   });
