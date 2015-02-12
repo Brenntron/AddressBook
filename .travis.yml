@@ -1,0 +1,22 @@
+language: node_js
+node_js:
+  - '0.10'
+before_install:
+  - npm install -g npm
+  - npm install -g bower
+  - bower install
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+script:
+  - npm run build
+  - npm run test-once
+after_script:
+  - cat ./coverage/PhantomJS*/lcov.info | ./node_modules/codeclimate-test-reporter/bin/codeclimate.js
+after_success:
+  - if [[ "$TRAVIS_PULL_REQUEST" == "false" ]] && [[ "$TRAVIS_BRANCH" == "master" ]]; then npm run deploy; fi
+env:
+  global:
+  - secure: Ly3V4Zghx7CPPqEXvzFNw/m+fAX6+v/dRZhnaTf5C+TmrUcUqGeDle7TpwPpXCYcQNmEzN6P24Wlb8gaud6XS9hSjf00P9SmozBv3ovHUF4jtFxYVcYmsfimcYTZPKH0jNrKZVQv/xTs8Wk06xkWrvM3kbedd2W+z/QZOmkAMx8=
+  - secure: DDg+ePUry/s1PGIP1jMBW4m9JB5jZKi8e/rmhc+kHNqNwnrj3kZNSOwtka0fYoQsU9a0hlnziqeh27PsyfuyrOd2aBH7y/KmWNUuHRj5WtwZJIczopd5dJC29ABEcb6GASg/OLlIDKNB43oZW7tbZJy1hbJ+4M7blqe2ONJIp1c=
+  - secure: QjwsNOn0vFvB3FL9ruz5qMjOwmEyejDOJHKhvynzaAJ9OfdlaJcv8DK7gJTb1TJ7PuYyIDVbav+kXide/OfOY+wc2f801u/UXnYfDM5UTEdUE9/M/tAtWwkTORnccQl6vVo/sLLPXYws4Gdchq+trApGOpJWCMG8buZNfqeDXsw=
+  - secure: D6xc4YghZHGjpskTOXG7RbqTWCXuxO5+E28YERkKdCphuezGBvie5t3M40ir/l3Ff+n2CqWHp8ZkgRe/ieTXbXsuLBlxNwXOaMHxYg3HQ35BkjXGujc50Mkr7JU/c2DGpft7QG25kDOJebiKhWdfKjb5rD3hBTQVOQeVzRoSrfY=
