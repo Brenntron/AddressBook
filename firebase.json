@@ -1,6 +1,6 @@
 {
   "firebase": "addressbook-c8",
-  "public": "./public",
+  "public": "public",
   "ignore": [
     "firebase.json",
     "**/.*",

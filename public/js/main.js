@@ -115,6 +115,7 @@ $('#submit').on('click', function(event){
 
   var url = FIREBASE_URL + 'users/' + fb.getAuth().uid + '/data/addresslist.json';
   var data = JSON.stringify({firstName: contactFirstName, nickname: contactNickname, lastName: contactLastName, phone: contactPhone, email: contactEmail, twitter: contactTwitter, photoUrl: contactPhoto});
+  debugger;
   $.post(url, data, function(res){
   $tr.attr('data-uuid', res.name);
   $('tbody').append($tr);
