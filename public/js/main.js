@@ -1,20 +1,12 @@
 /* jshint jquery: true */
-/* global async: false */
 
 'use strict';
 
-//var $        = require('jquery'),
-    //_        = require('lodash'),
-    //Firebase = require('firebase');
-
-'use strict';
-var FIREBASE_URL = 'https://addressbook-c8.firebaseio.com/',
+var FIREBASE_URL = 'https://addressbook-c8.firebaseio.com',
     $hidden      = $('.hidden'),
-    $form        = $('form'),
     $create      = $('#createButton'),
     fb           = new Firebase(FIREBASE_URL),
-    token        = fb.getAuth().token,
-    usersFbUrl;
+    usersFb;
 
 
 if (fb.getAuth()) {
@@ -22,12 +14,13 @@ if (fb.getAuth()) {
   $('.app').toggleClass('hidden'),
   $('.hidden-button').toggle();
 
-  $.get(FIREBASE_URL + 'users/' + fb.getAuth().uid + '/data/addresslist.json?auth=' + token, function(res){
-    if(res !== null) {
-      Object.keys(res).forEach(function(uuid){
-        addRowToTable(uuid,res[uuid]);
-      });
-    }
+  usersFb = fb.child('users/' + fb.getAuth().uid + '/data/friends');
+
+  usersFb.once('value', function (res){
+    var data = res.val();
+    Object.keys(data).forEach(function (uuid){
+      addRowToTable(uuid, data[uuid]);
+    });
   });
 }
 
@@ -44,7 +37,7 @@ $('.button').click(function () {
       $('.error').text(err);
     } else {
       location.reload(true);
-    }firebase
+    }
   });
   $('.hidden-button').toggle();
   $('.loginForm').hide();
@@ -114,27 +107,30 @@ $('#submit').on('click', function(event){
 
   var $tr = $('<tr><td>' + contactFirstName + '</td><td>' + contactNickname + '</td><td>' + contactLastName + '</td><td>' + contactPhone + '</td><td>' + contactEmail + '</td><td>'+ contactTwitter+'</td><td><img src="'+ contactPhoto+'" class="image"</td><td><button class="removeBtn">Remove</button><td></tr>');
 
-  var url = FIREBASE_URL + 'users/' + fb.getAuth().uid + '/data/addresslist.json?auth=' + token;
-  var data = JSON.stringify({firstName: contactFirstName, nickname: contactNickname, lastName: contactLastName, phone: contactPhone, email: contactEmail, twitter: contactTwitter, photoUrl: contactPhoto});
-  debugger;
-  $.post(url, data, function(res){
-  $tr.attr('data-uuid', res.name);
-  $('tbody').append($tr);
+  addFriendToDb(req, function(res) {
+    $tr.attr('data-uuid', res.name);
+    $('tbody').append($tr);
   });
 });
 
-  function addRowToTable(uuid, obj){
-    var $tr = $('<tr><td class="firstName">' + obj.firstName + '</td><td class="nickname">' + obj.nickname + '</td><td class="lastName">' + obj.lastName + '</td><td>' + obj.phone + '</td><td class="email">'+ obj.email + '</td><td class="twitter">'+ obj.twitter+'</td><td class="photo"><img src="'+ obj.photoUrl + '" class="image"></td><td class="remove"><button class="removeBtn">Remove</button><td></tr>');
-    $tr.attr('data-uuid', uuid);
-    $('tbody').append($tr);
-  }
+function addFriendToDb(data, cd) {
+  var uuid = usersFb.push(data).key();
+  cb({name: uuid});
+}
 
-  $('tbody').on('click', '.removeBtn', function(evt){
 
-  var $tr = $(evt.target).closest('tr');
+function addRowToTable(uuid, obj){
+  var $tr = $('<tr><td class="firstName">' + obj.firstName + '</td><td class="nickname">' + obj.nickname + '</td><td class="lastName">' + obj.lastName + '</td><td>' + obj.phone + '</td><td class="email">'+ obj.email + '</td><td class="twitter">'+ obj.twitter+'</td><td class="photo"><img src="'+ obj.photoUrl + '" class="image"></td><td class="remove"><button class="removeBtn">Remove</button><td></tr>');
+  $tr.attr('data-uuid', uuid);
+  $('tbody').append($tr);
+}
+
+$('tbody').on('click', '.removeBtn', function(evt){
+
+  var $tr = $(evt.target).closest('tr'),
+      uuid = $tr.data('uuid');
+
   $tr.remove();
 
-  var uuid = $tr.data('uuid');
-  var url = 'https://addressbook-c8.firebaseio.com/users/' + fb.getAuth().uid + '/data/addresslist/' + uuid + '.json?auth=' + token;
-  $.ajax(url, {type: 'DELETE'});
-  });
+  usersFb.child(uuid).remove();
+});
